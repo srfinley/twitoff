@@ -4,4 +4,4 @@ from .app import create_app
 
 APP = create_app()
 
-# run in terminal with FLASK_APP=TWITOFF:APP flask run
+# run in terminal with FLASK_APP=TWITOFF:APP flask run 

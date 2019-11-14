@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>User: {{ title }}</h2>
+
+<p>{{ message }}</p>
+<form action="/" method="get">
+    <input type="submit" value="Add another user">
+</form>
+
+<ul>
+  {% for tweet in tweets %}
+  <li> {{ tweet.id }} - {{ tweet.text }}</li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

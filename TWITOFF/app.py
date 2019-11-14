@@ -21,25 +21,13 @@ def create_app():
     # tell database about app
     DB.init_app(app)
 
+    # home page
     @app.route('/')
     def root():
         users = User.query.all()
         return render_template('base.html', title='Home', users=users)
 
-    # @app.route('/usertweets/<username>')
-    # def show_user_tweets(username):
-    #     twitter_user=TWITTER.get_user(username)
-    #     tweets=twitter_user.timeline(count=200, exclude_replies=True,
-    #                                  include_rts=False, tweet_mode='extended')
-    #     db_user=User(id=twitter_user.id, name=twitter_user.screen_name,
-    #                  newest_tweet_id=tweets[0].id)
-    #     for tweet in tweets:
-    #         embedding = BASILICA.embed_sentence(tweet.full_text, model='twitter')
-    #         db_tweet = Tweet(id=tweet.id, text=tweet.full_text[:500], embedding=embedding)
-    #         DB.session.add(db_tweet)
-    #         db_user.tweets.append(db_tweet)
-    #     return render_template('username.html', username=username, tweets=tweets)
-
+    # page you get when you add a tweeter
     @app.route('/user', methods=['POST'])
     @app.route('/user/<name>', methods=['GET'])
     def user(name=None, message=''):
@@ -52,8 +40,10 @@ def create_app():
         except Exception as e:
             message = "Error adding {}: {}".format(name, e)
             tweets = []
-        return render_template('user.html', title=name, tweets=tweets, message=message)
+        return render_template('user.html', title=name,
+                               tweets=tweets, message=message)
 
+    # page you get for predicting which tweeter would tweet
     @app.route('/compare', methods=['POST'])
     def compare(message=''):
         user1, user2 = sorted([request.values['user1'], request.values['user2']])
@@ -61,12 +51,14 @@ def create_app():
             message = "Cannot compare users to themselves"
         else:
             prediction = predict_user(user1, user2, request.values['tweet_text'])[0]
-            percent = int(round(max(predict_user(user1, user2, request.values['tweet_text'])[1][0]) * 100))
+            percent = int(round(max(predict_user(user1, user2,
+                                                 request.values['tweet_text'])[1][0]) * 100))
             message = '"{}" is more likely to be said by {} than {}. Confidence: {}%'.format(
-                request.values['tweet_text'], user1 if prediction else user2, user2 if prediction else user1, percent)
+                request.values['tweet_text'], user1 if prediction else user2,
+                user2 if prediction else user1, percent)
         return render_template('prediction.html', title='Prediction', message=message)
 
-
+    # if you go here, the database empties. beware!
     @app.route('/reset')
     def reset():
         DB.drop_all()
